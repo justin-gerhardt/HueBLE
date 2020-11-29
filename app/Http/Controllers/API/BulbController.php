@@ -11,26 +11,33 @@ class BulbController extends Controller
 
     public function index()
     {
-        return HueBulb::all();
+        return HueBulb::all()->load("groups");
     }
 
 
     public function store(Request $request)
     {
-        return HueBulb::create($request->all());
+        $bulb = HueBulb::create($request->all());
+        if ($request->has("groups")) {
+            $bulb->groups()->sync($request->input("groups"));
+        }
+        return $bulb->load("groups");
     }
 
 
     public function show(HueBulb $bulb)
     {
-        return $bulb;
+        return $bulb->load("groups");
     }
 
 
     public function update(Request $request, HueBulb $bulb)
     {
         $bulb->update($request->all());
-        return $bulb;
+        if ($request->has("groups")) {
+            $bulb->groups()->sync($request->input("groups"));
+        }
+        return $bulb->load("groups");
     }
 
     public function destroy(HueBulb $bulb)
@@ -39,12 +46,14 @@ class BulbController extends Controller
         return 204;
     }
 
-    public function isLit(HueBulb $bulb){
+    public function isLit(HueBulb $bulb)
+    {
         return '{"lit": ' . ($bulb->isLit() ? "true" : "false") . '}';
     }
 
-    public function setState(Request $request, HueBulb $bulb){
-        $state =  $request->boolean('lit');
+    public function setState(Request $request, HueBulb $bulb)
+    {
+        $state = $request->boolean('lit');
         # TODO: distinguish false and not set
         $bulb->SetState($state);
     }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\LightGroupController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\BulbController;
@@ -25,3 +26,8 @@ Route::post('bulbs/{bulb}/lit', [BulbController::class, 'setState']);
 
 
 Route::apiResource('bulbs', BulbController::class);
+
+Route::get('groups/{group}/lit', [LightGroupController::class, 'isLit']);
+Route::post('groups/{group}/lit', [LightGroupController::class, 'setState']);
+Route::apiResource('groups', LightGroupController::class);
+

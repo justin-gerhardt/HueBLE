@@ -14,6 +14,10 @@ class HueBulb extends Model
         'mac'
     ];
 
+    public function groups()
+    {
+        return $this->belongsToMany('App\Models\LightGroup');
+    }
 
     const POWER_SERVICE_UUID = "932c32bd-0000-47a2-835a-a8d455b859dd";
     const POWER_CHARACTERISTIC_UUID = "932c32bd-0002-47a2-835a-a8d455b859dd";

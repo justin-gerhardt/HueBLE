@@ -45,6 +45,8 @@ class Bluetooth
         return $proxy->GetManagedObjects()->getData(); # documented https://dbus.freedesktop.org/doc/dbus-specification.html#standard-interfaces-objectmanager
     }
 
+    # TODO: There is a brief moment when connected by services haven't been resolved yet
+    # We should wait (ideally by setting up a notification on the ServicesResolved property)
     private function Connect(string $mac): void
     {
         $state = $this->GetBluezState();
@@ -103,7 +105,7 @@ class Bluetooth
             }
             return $this->bus->createProxy("org.bluez", $objectPath, "org.bluez.GattCharacteristic1");
         }
-        return NULL;
+        return null;
     }
 
     # TODO: encapsulate
