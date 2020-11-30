@@ -29,7 +29,7 @@ class LightGroup extends Model
             $on = $bulb->isLit();
             $seenOn = $seenOn || $on;
             $seenOff = $seenOff || !$on;
-            if(($on && $seenOff) || (!$on && $seenOn)){
+            if($seenOn && $seenOff){
                 return "inconsistent";
             }
         }
