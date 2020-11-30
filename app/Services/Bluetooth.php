@@ -15,6 +15,10 @@ class DeviceNotPairedException extends BluetoothException
 {
 }
 
+class ServiceResolutionTimeout extends BluetoothException
+{
+}
+
 class Bluetooth
 {
 
@@ -29,7 +33,10 @@ class Bluetooth
     # The GattCharacteristic1 and GattService1 API is documented at https://git.kernel.org/pub/scm/bluetooth/bluez.git/tree/doc/gatt-api.txt
     # The Device1 API is documented at https://git.kernel.org/pub/scm/bluetooth/bluez.git/tree/doc/device-api.txt
 
+    const SERVICE_RESOLVE_TIMEOUT_SECONDS = 10;
+
     private Dbus $bus;
+
 
     public function __construct()
     {
@@ -45,8 +52,25 @@ class Bluetooth
         return $proxy->GetManagedObjects()->getData(); # documented https://dbus.freedesktop.org/doc/dbus-specification.html#standard-interfaces-objectmanager
     }
 
-    # TODO: There is a brief moment when connected by services haven't been resolved yet
-    # We should wait (ideally by setting up a notification on the ServicesResolved property)
+    private function WaitForServiceResolution(String $objectPath){
+        # The dbus library doesn't natively support accessing properties
+        # we must instead invoke the dbus property methods to get property values
+        $proxy = $this->bus->createProxy("org.bluez", $objectPath, "org.freedesktop.DBus.Properties");
+        # we could in theory listen for the property changed signal and check if the ServicesResolved was changed
+        # However, the php dbus library doesn't allow for registering signal handlers on objects
+        # nor can we cancel a handler. We would be catching every property change of every bluetooth
+        # device for the duration of the program
+        $timeoutCounter = self::SERVICE_RESOLVE_TIMEOUT_SECONDS * 1000;
+        while(!$proxy->Get("org.bluez.Device1", "ServicesResolved")->getData()){
+            usleep(100 * 1000); # 100ms
+            $timeoutCounter -= 100;
+            if ($timeoutCounter < 0){
+                $mac = $proxy->Get("org.bluez.Device1", "Address")->getData();
+                throw new ServiceResolutionTimeout("Failed to resolve bluetooth services for " . $mac . " in " . self::SERVICE_RESOLVE_TIMEOUT_SECONDS . " seconds");
+            }
+        }
+    }
+
     private function Connect(string $mac): void
     {
         $state = $this->GetBluezState();
@@ -63,10 +87,12 @@ class Bluetooth
             }
             # we found an instance of the device, it could be associated with multiple adapters
             if ($properties["Connected"]->getData()) {
-                return; # already connected
+                if(!$properties["ServicesResolved"]->getData()){
+                    $this->WaitForServiceResolution($objectPath);
+                }
+                return; # already connected and ready
             }
-
-            # we can only connect if paired
+            # we can only connect (usefully) if paired
             if ($properties["Paired"]->getData()) {
                 $unconnectedDevices[] = $objectPath;
             }
@@ -78,6 +104,7 @@ class Bluetooth
 
         $proxy = $this->bus->createProxy("org.bluez", $unconnectedDevices[0], "org.bluez.Device1");
         $proxy->Connect();
+        $this->WaitForServiceResolution($unconnectedDevices[0]);
     }
 
     private function GetCharacteristicProxy(string $mac, string $serviceUUID, string $characteristicUUID): ?\DbusObject
@@ -108,7 +135,10 @@ class Bluetooth
         return null;
     }
 
-    # TODO: encapsulate
+    # I've considered creating a device class (with a mac) than provides service classes (with service uuid) that provide
+    # characteristic classes (with characteristic uuid). This would provide a simple read, write function
+    # however, either the model has to reconstruct these objects every call saving nothing in typing
+    # or it has to reconstruct the object every time the mac changes
     public function WriteCharacteristic(string $mac, string $serviceUUID, string $characteristicUUID, array $data)
     {
         $this->Connect($mac);
