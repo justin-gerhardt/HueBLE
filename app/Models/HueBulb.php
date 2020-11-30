@@ -14,6 +14,9 @@ class HueBulb extends Model
         'mac'
     ];
 
+    protected $visible = ['id', 'mac', "groups"];
+
+
     public function groups()
     {
         return $this->belongsToMany('App\Models\LightGroup');

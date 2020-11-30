@@ -13,6 +13,8 @@ class LightGroup extends Model
         'name'
     ];
 
+    protected $visible = ['id', 'name', "bulbs"];
+
     public function bulbs()
     {
         return $this->belongsToMany('App\Models\HueBulb');
