@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\LightGroup;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class LightGroupController extends Controller
 {
@@ -16,6 +17,11 @@ class LightGroupController extends Controller
 
     public function store(Request $request)
     {
+        $this->validate($request, [
+            'name' => ['required', "unique:App\\Models\\LightGroup,name"],
+            'bulbs' => ['array'],
+            'bulbs.*' => ['exists:App\\Models\\HueBulb,id']
+        ]);
         $group = LightGroup::create($request->all());
         if ($request->has("bulbs")) {
             $group->bulbs()->sync($request->input("bulbs"));
@@ -32,6 +38,11 @@ class LightGroupController extends Controller
 
     public function update(Request $request, LightGroup $group)
     {
+        $this->validate($request, [
+            'name' => [ Rule::unique(LightGroup::class,'name')->ignore($group->id)],
+            'bulbs' => ['array'],
+            'bulbs.*' => ['exists:App\\Models\\HueBulb,id']
+        ]);
         $group->update($request->all());
         if ($request->has("bulbs")) {
             $group->bulbs()->sync($request->input("bulbs"));
@@ -51,9 +62,10 @@ class LightGroupController extends Controller
     }
 
     public function setState(Request $request, LightGroup $group){
-        $state =  $request->boolean('lit');
-        # TODO: distinguish false and not set
-        $group->SetState($state);
+        $this->validate($request, [
+            'lit' => ["required", "boolean"]
+        ]);
+        $group->SetState($request->boolean('lit'));
     }
 
 }
