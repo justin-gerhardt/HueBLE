@@ -76,8 +76,8 @@ class Bluetooth
             throw new DeviceNotPairedException($mac . " had not been paired and can't be connected to");
         }
 
-        $proxu = $this->bus->createProxy("org.bluez", $unconnectedDevices[0], "org.bluez.Device1");
-        $proxu->Connect();
+        $proxy = $this->bus->createProxy("org.bluez", $unconnectedDevices[0], "org.bluez.Device1");
+        $proxy->Connect();
     }
 
     private function GetCharacteristicProxy(string $mac, string $serviceUUID, string $characteristicUUID): ?\DbusObject
