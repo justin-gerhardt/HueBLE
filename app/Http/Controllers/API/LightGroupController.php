@@ -58,7 +58,9 @@ class LightGroupController extends Controller
 
 
     public function isLit(LightGroup $group){
-        return '{"lit": "' . ($group->LitStatus() ?? "null") . '"}';
+        return response()->json([
+            'lit' =>  $group->LitStatus()
+        ]);
     }
 
     public function setState(Request $request, LightGroup $group){

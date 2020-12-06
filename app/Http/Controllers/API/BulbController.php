@@ -60,7 +60,9 @@ class BulbController extends Controller
 
     public function isLit(HueBulb $bulb)
     {
-        return '{"lit": ' . ($bulb->isLit() ? "true" : "false") . '}';
+        return response()->json([
+            'lit' =>  $bulb->isLit()
+        ]);
     }
 
     public function setState(Request $request, HueBulb $bulb)
