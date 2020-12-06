@@ -53,7 +53,7 @@ class LightGroupController extends Controller
     public function destroy(LightGroup $group)
     {
         $group->delete();
-        return 204;
+        return response()->noContent();
     }
 
 
@@ -66,6 +66,7 @@ class LightGroupController extends Controller
             'lit' => ["required", "boolean"]
         ]);
         $group->SetState($request->boolean('lit'));
+        return response()->noContent();
     }
 
 }

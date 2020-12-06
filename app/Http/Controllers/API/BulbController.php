@@ -55,7 +55,7 @@ class BulbController extends Controller
     public function destroy(HueBulb $bulb)
     {
         $bulb->delete();
-        return 204;
+        return response()->noContent();
     }
 
     public function isLit(HueBulb $bulb)
@@ -69,5 +69,6 @@ class BulbController extends Controller
             'lit' => ["required", "boolean"]
         ]);
         $bulb->SetState($request->boolean('lit'));
+        return response()->noContent();
     }
 }
