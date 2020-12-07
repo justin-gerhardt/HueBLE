@@ -17,7 +17,7 @@ It requires the [pecl D-Bus extension](https://github.com/derickr/pecl-dbus). \
 If you have the good taste to be using Nix, a shell.nix file has been provided that sets up the required php environment if you run nix-shell
 
 #### TODO
-* Make errors JSON
 * version API
 * remove the unneeded frontend templating
 * automatic testing
+* api key
