@@ -36,6 +36,9 @@ return [
     */
 
     'guards' => [
+        'apikey' => [
+            "driver" => "apikey"
+        ],
         'web' => [
             'driver' => 'session',
             'provider' => 'users',
