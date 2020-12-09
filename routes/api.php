@@ -16,15 +16,9 @@ use App\Http\Controllers\API\BulbController;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
 
 Route::get('bulbs/{bulb}/lit', [BulbController::class, 'isLit']);
 Route::post('bulbs/{bulb}/lit', [BulbController::class, 'setState']);
-
-
 Route::apiResource('bulbs', BulbController::class);
 
 Route::get('groups/{group}/lit', [LightGroupController::class, 'isLit']);

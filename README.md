@@ -20,5 +20,5 @@ If you have the good taste to be using Nix, a shell.nix file has been provided t
 
 #### TODO
 * version API
-* remove the unneeded templating
+* logging
 * automatic testing
